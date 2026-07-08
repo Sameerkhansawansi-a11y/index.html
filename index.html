@@ -1,90 +1,406 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Interactive Login Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuralHub – Discover the Best AI Tools</title>
+<meta name="description" content="NeuralHub is a curated directory of the best AI tools across writing, image, video, coding, productivity and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#0a0d16;
+  --bg-alt:#0f1320;
+  --surface:rgba(255,255,255,0.05);
+  --surface-hover:rgba(255,255,255,0.09);
+  --border:rgba(255,255,255,0.09);
+  --text:#e9ebf6;
+  --text-dim:#98a0bd;
+  --text-faint:#626a89;
+  --accent:#7c5cff;
+  --accent-2:#22d3ee;
+  --accent-grad:linear-gradient(135deg,var(--accent),var(--accent-2));
+  --radius:18px;
+  --radius-sm:12px;
+  --shadow:0 8px 30px rgba(0,0,0,0.35);
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
 
-        .login-box {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px gray;
-            width: 320px;
-        }
+[data-theme="light"]{
+  --bg:#f5f6fb;
+  --bg-alt:#ffffff;
+  --surface:rgba(255,255,255,0.65);
+  --surface-hover:rgba(255,255,255,0.9);
+  --border:rgba(15,20,35,0.08);
+  --text:#161a2c;
+  --text-dim:#4c5370;
+  --text-faint:#8891ab;
+  --shadow:0 8px 30px rgba(20,20,40,0.08);
+}
 
-        h2 {
-            text-align: center;
-        }
+/* ============ RESET ============ */
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.6;
+  overflow-x:hidden;
+  transition:background .4s ease,color .4s ease;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(124,92,255,0.16), transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(34,211,238,0.12), transparent 40%);
+  z-index:-1;
+  pointer-events:none;
+}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+button{font:inherit;}
+h1,h2,h3{font-family:var(--font-display);}
+::selection{background:var(--accent);color:#fff;}
+::-webkit-scrollbar{width:9px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px;}
 
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
+/* ============ UTILITIES ============ */
+.section{max-width:1200px;margin:0 auto;padding:100px 24px;}
+.section-head{text-align:center;max-width:600px;margin:0 auto 50px;}
+.section-head h2{font-size:clamp(1.8rem,3.5vw,2.4rem);margin:10px 0 12px;letter-spacing:-0.02em;}
+.section-head p{color:var(--text-dim);}
+.eyebrow{
+  font-family:var(--font-mono);font-size:.8rem;color:var(--accent-2);
+  letter-spacing:.05em;display:inline-block;padding:6px 14px;
+  border:1px solid var(--border);border-radius:999px;background:var(--surface);
+}
+.btn-primary{
+  background:var(--accent-grad);color:#fff;border:none;padding:12px 22px;
+  border-radius:12px;font-weight:600;cursor:pointer;font-size:.95rem;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,92,255,.35);}
 
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            font-size: 20px; /* Required font size */
-            box-sizing: border-box;
-        }
+.tool-card,.feature-card,.category-card,.info-card,.contact-form,.faq-item{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  backdrop-filter:blur(14px) saturate(160%);
+  box-shadow:var(--shadow);
+}
 
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 20px;
-            font-size: 18px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.in-view{opacity:1;transform:translateY(0);}
 
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+/* ============ SCROLL PROGRESS + LOADER ============ */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;
+  background:var(--accent-grad);z-index:9999;
+  box-shadow:0 0 8px var(--accent-2);
+}
+.loader{
+  position:fixed;inset:0;background:var(--bg);display:flex;
+  align-items:center;justify-content:center;z-index:10000;
+  transition:opacity .5s ease,visibility .5s ease;
+}
+.loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.loader-orbit{position:relative;width:60px;height:60px;}
+.loader-orbit span{position:absolute;inset:0;border:3px solid transparent;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+.loader-orbit span:nth-child(2){border-top-color:var(--accent-2);animation-duration:1.5s;inset:8px;opacity:.7;}
+.loader-orbit span:nth-child(3){border-top-color:var(--text);animation-duration:2s;inset:16px;opacity:.5;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ============ NAVBAR ============ */
+.navbar{
+  position:sticky;top:0;z-index:1000;
+  backdrop-filter:blur(16px) saturate(160%);
+  background:rgba(10,13,22,0.55);
+  border-bottom:1px solid var(--border);
+  transition:background .4s ease;
+}
+[data-theme="light"] .navbar{background:rgba(255,255,255,0.65);}
+.nav-container{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;}
+.logo{font-family:var(--font-display);font-weight:700;font-size:1.4rem;color:var(--text);text-decoration:none;letter-spacing:-0.02em;}
+.logo span{background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.nav-links{display:flex;gap:28px;}
+.nav-links a{color:var(--text-dim);text-decoration:none;font-size:.95rem;font-weight:500;position:relative;transition:color .25s ease;}
+.nav-links a:hover{color:var(--text);}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:-4px;width:0;height:2px;background:var(--accent-grad);transition:width .25s ease;}
+.nav-links a:hover::after{width:100%;}
+.nav-actions{display:flex;align-items:center;gap:12px;}
+.icon-btn{
+  background:var(--surface);border:1px solid var(--border);width:40px;height:40px;
+  border-radius:12px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.1rem;color:var(--text);transition:transform .2s ease,background .2s ease;
+}
+.icon-btn:hover{transform:translateY(-2px);background:var(--surface-hover);}
+.mobile-only{display:none;}
+#menuToggle span{display:block;width:20px;height:2px;background:var(--text);margin:4px auto;border-radius:2px;transition:all .3s ease;}
+
+/* ============ HERO ============ */
+.hero{position:relative;min-height:92vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 60px;overflow:hidden;}
+.hero-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.5;}
+.hero-content{position:relative;z-index:2;max-width:720px;text-align:center;margin:0 auto;}
+.hero h1{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:700;line-height:1.15;margin-bottom:20px;letter-spacing:-0.02em;}
+.hero .eyebrow{margin-bottom:18px;}
+.hero-sub{color:var(--text-dim);font-size:1.05rem;max-width:560px;margin:0 auto 34px;}
+.hero-search{
+  display:flex;gap:10px;max-width:520px;margin:0 auto 40px;
+  background:var(--surface);border:1px solid var(--border);padding:6px;
+  border-radius:16px;backdrop-filter:blur(10px);
+}
+.hero-search input{flex:1;background:transparent;border:none;outline:none;color:var(--text);padding:12px 16px;font-size:.95rem;}
+.hero-search input::placeholder{color:var(--text-faint);}
+.hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;}
+.stat{display:flex;flex-direction:column;align-items:center;}
+.stat strong{font-family:var(--font-display);font-size:1.6rem;color:var(--text);}
+.stat span{font-size:.8rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;}
+
+/* ============ TOOL CARDS / GRIDS ============ */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;}
+.tool-card{position:relative;padding:28px 24px;display:flex;flex-direction:column;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;}
+.tool-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 14px 40px rgba(124,92,255,.18);}
+.tool-card.hide{display:none;}
+.tool-badge{position:absolute;top:18px;right:18px;font-family:var(--font-mono);font-size:.65rem;background:var(--accent-grad);color:#fff;padding:4px 10px;border-radius:999px;letter-spacing:.03em;}
+.tool-icon{font-size:2rem;margin-bottom:14px;}
+.tool-card h3{font-size:1.2rem;margin-bottom:8px;}
+.tool-card p{color:var(--text-dim);font-size:.9rem;flex:1;margin-bottom:16px;}
+.tool-tag{font-family:var(--font-mono);font-size:.72rem;color:var(--accent-2);background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);padding:4px 10px;border-radius:8px;align-self:flex-start;margin-bottom:16px;}
+.tool-link{font-weight:600;font-size:.9rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:gap .2s ease,color .2s ease;}
+.tool-link:hover{gap:8px;color:var(--accent-2);}
+
+/* ============ CATEGORIES ============ */
+.categories-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
+.category-card{
+  padding:26px 20px;text-align:center;cursor:pointer;color:var(--text);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  transition:transform .3s ease,border-color .3s ease;
+}
+.category-card:hover{transform:translateY(-5px);border-color:var(--accent-2);}
+.category-card.active{border-color:var(--accent);background:var(--surface-hover);}
+.cat-icon{font-size:1.8rem;}
+.category-card h3{font-size:1rem;}
+.cat-count{color:var(--text-faint);font-size:.78rem;font-family:var(--font-mono);}
+
+/* ============ FILTER BAR ============ */
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:36px;}
+.filter-pill{padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);font-size:.85rem;cursor:pointer;transition:all .25s ease;}
+.filter-pill:hover{color:var(--text);border-color:var(--accent-2);}
+.filter-pill.active{background:var(--accent-grad);color:#fff;border-color:transparent;}
+.no-results{text-align:center;color:var(--text-faint);margin-top:30px;font-family:var(--font-mono);}
+
+/* ============ WHY CHOOSE US ============ */
+.why-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;}
+.feature-card{padding:30px 24px;text-align:center;transition:transform .3s ease;}
+.feature-card:hover{transform:translateY(-5px);}
+.feature-icon{font-size:2rem;margin-bottom:14px;}
+.feature-card h3{font-size:1.1rem;margin-bottom:8px;}
+.feature-card p{color:var(--text-dim);font-size:.9rem;}
+
+/* ============ FAQ ============ */
+.faq-list{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+.faq-item{border-radius:var(--radius-sm);overflow:hidden;}
+.faq-question{width:100%;background:none;border:none;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--text);font-size:1rem;font-weight:600;text-align:left;}
+.faq-icon{font-size:1.3rem;color:var(--accent-2);transition:transform .3s ease;font-weight:400;}
+.faq-item.open .faq-icon{transform:rotate(45deg);}
+.faq-answer{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;padding:0 22px;}
+.faq-item.open .faq-answer{max-height:200px;padding:0 22px 20px;}
+.faq-answer p{color:var(--text-dim);font-size:.92rem;line-height:1.6;}
+
+/* ============ CONTACT ============ */
+.contact-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:30px;}
+.contact-form{padding:32px;display:flex;flex-direction:column;gap:18px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group label{font-size:.85rem;color:var(--text-dim);font-weight:500;}
+.form-group input,.form-group textarea{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;color:var(--text);font-family:var(--font-body);font-size:.95rem;
+  outline:none;transition:border-color .25s ease;resize:vertical;
+}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent-2);}
+.form-status{color:var(--accent-2);font-size:.9rem;font-family:var(--font-mono);}
+.contact-info{display:flex;flex-direction:column;gap:18px;}
+.info-card{padding:24px;}
+.info-card h3{font-size:1rem;margin-bottom:6px;}
+.info-card p{color:var(--text-dim);font-size:.92rem;}
+.social-links{display:flex;gap:10px;margin-top:6px;}
+.social-links a{
+  width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:.85rem;
+  transition:all .25s ease;
+}
+.social-links a:hover{border-color:var(--accent-2);transform:translateY(-3px);}
+
+/* ============ FOOTER ============ */
+.footer{border-top:1px solid var(--border);padding:60px 24px 24px;background:var(--bg-alt);}
+.footer-container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:40px;padding-bottom:40px;}
+.footer-col h4{font-size:.95rem;margin-bottom:16px;color:var(--text);}
+.footer-col a{display:block;color:var(--text-dim);text-decoration:none;font-size:.9rem;margin-bottom:10px;transition:color .2s ease;}
+.footer-col a:hover{color:var(--accent-2);}
+.footer-brand p{color:var(--text-dim);font-size:.9rem;margin-top:12px;max-width:240px;}
+.footer-bottom{max-width:1200px;margin:0 auto;border-top:1px solid var(--border);padding-top:20px;text-align:center;color:var(--text-faint);font-size:.85rem;}
+
+/* ============ BACK TO TOP ============ */
+.back-to-top{
+  position:fixed;bottom:26px;right:26px;width:46px;height:46px;border-radius:14px;
+  background:var(--accent-grad);color:#fff;border:none;font-size:1.2rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;
+  transform:translateY(10px);transition:all .3s ease;z-index:900;
+  box-shadow:0 8px 24px rgba(124,92,255,.35);
+}
+.back-to-top.visible{opacity:1;visibility:visible;transform:translateY(0);}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:900px){
+  .contact-grid{grid-template-columns:1fr;}
+  .footer-container{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:768px){
+  .nav-links{
+    position:fixed;top:69px;left:0;right:0;background:var(--bg-alt);flex-direction:column;
+    padding:20px 24px;border-bottom:1px solid var(--border);gap:16px;
+    transform:translateY(-120%);opacity:0;visibility:hidden;transition:all .35s ease;
+  }
+  .nav-links.open{transform:translateY(0);opacity:1;visibility:visible;}
+  .mobile-only{display:flex;flex-direction:column;justify-content:center;gap:4px;background:none;border:none;}
+  .hero-search{flex-direction:column;border-radius:16px;}
+  .hero-stats{gap:24px;}
+  .footer-container{grid-template-columns:1fr;text-align:center;}
+  .social-links{justify-content:center;}
+  .section{padding:70px 20px;}
+}
+@media (max-width:480px){
+  .hero{padding:90px 20px 50px;}
+  .tools-grid,.categories-grid,.why-grid{grid-template-columns:1fr;}
+}
+
+</style>
 </head>
 <body>
 
-<div class="login-box">
-    <h2>Login Form</h2>
+<div class="scroll-progress" id="scrollProgress"></div>
 
-    <form onsubmit="return validateForm()">
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Enter Username">
-
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter Password">
-
-        <button type="submit">Login</button>
-    </form>
+<div id="loader" class="loader">
+  <div class="loader-orbit"><span></span><span></span><span></span></div>
 </div>
 
-<script>
-function validateForm() {
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
+<header class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="#home" class="logo">Neural<span>Hub</span></a>
 
-    if (username === "" || password === "") {
-        alert("Please enter both Username and Password.");
-        return false;
-    }
+    <nav class="nav-links" id="navLinks">
+      <a href="#home">Home</a>
+      <a href="#featured">Featured</a>
+      <a href="#categories">Categories</a>
+      <a href="#popular">Popular</a>
+      <a href="#why">Why Us</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </nav>
 
-    alert("Login Successful!");
-    return true;
-}
-</script>
+    <div class="nav-actions">
+      <button id="themeToggle" class="icon-btn" aria-label="Toggle light and dark mode">🌙</button>
+      <button id="menuToggle" class="icon-btn mobile-only" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
 
-</body>
-            </html>
+<main>
+
+  <section id="home" class="hero">
+    <canvas id="particleCanvas" class="hero-canvas"></canvas>
+    <div class="hero-content">
+      <span class="eyebrow">// 200+ AI tools indexed</span>
+      <h1>Find the right AI tool,<br>without the noise.</h1>
+      <p class="hero-sub">NeuralHub curates and organizes the internet's best AI tools into one clean, searchable directory — so you spend less time browsing and more time building.</p>
+
+      <div class="hero-search">
+        <input type="text" id="searchInput" placeholder="Search for ChatGPT, Midjourney, Notion AI...">
+        <button id="searchBtn" class="btn-primary">Search</button>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat"><strong>200+</strong><span>AI Tools</span></div>
+        <div class="stat"><strong>12</strong><span>Categories</span></div>
+        <div class="stat"><strong>50k+</strong><span>Monthly Visitors</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="featured" class="section">
+    <div class="section-head">
+      <span class="eyebrow">// Handpicked</span>
+      <h2>Featured AI Tools</h2>
+      <p>The tools our community reaches for first.</p>
+    </div>
+
+    <div class="tools-grid featured-grid">
+      <article class="tool-card" data-category="chatbots" data-name="chatgpt">
+        <span class="tool-badge">Featured</span>
+        <div class="tool-icon">💬</div>
+        <h3>ChatGPT</h3>
+        <p>Conversational AI assistant for writing, brainstorming, coding help and everyday Q&A.</p>
+        <span class="tool-tag">Chatbots & Assistants</span>
+        <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer" class="tool-link">Visit Tool →</a>
+      </article>
+
+      <article class="tool-card" data-category="image" data-name="midjourney">
+        <span class="tool-badge">Featured</span>
+        <div class="tool-icon">🎨</div>
+        <h3>Midjourney</h3>
+        <p>Generates high-quality AI artwork and illustrations from simple text prompts.</p>
+        <span class="tool-tag">Image Generation</span>
+        <a href="https://www.midjourney.com" target="_blank" rel="noopener noreferrer" class="tool-link">Visit Tool →</a>
+      </article>
+
+      <article class="tool-card" data-category="code" data-name="github copilot">
+        <span class="tool-badge">Featured</span>
+        <div class="tool-icon">👨‍💻</div>
+        <h3>GitHub Copilot</h3>
+        <p>AI pair programmer that suggests code completions directly inside your editor.</p>
+        <span class="tool-tag">Code & Development</span>
+        <a href="https://github.com/features/copilot" target="_blank" rel="noopener noreferrer" class="tool-link">Visit Tool →</a>
+      </article>
+
+      <article class="tool-card" data-category="productivity" data-name="notion ai">
+        <span class="tool-badge">Featured</span>
+        <div class="tool-icon">📝</div>
+        <h3>Notion AI</h3>
+        <p>Built-in writing assistant for Notion that drafts, summarizes and organizes notes.</p>
+        <span class="tool-tag">Productivity</span>
+        <a href="https://www.notion.so/product/ai" target="_blank" rel="noopener noreferrer" class="tool-link">Visit Tool →</a>
+      </article>
+    </div>
+  </section>
+
+  <section id="categories" class="section">
+    <div class="section-head">
+      <span class="eyebrow">// Browse</span>
+      <h2>Categories</h2>
+      <p>Jump straight to the kind of tool you need.</p>
+    </div>
+
+    <div class="categories-grid">
+      <button class="category-card" data-filter="writing">
+        <span class="cat-icon">✍️</span><h3>Writing & Content</h3><span class="cat-count">24 tools</span>
+      </button>
+      <button class="category-card" data-filter="image">
+        <span class="cat-icon">🎨</span><h3>Image Generation</h3><span class="cat-count">19 tools</span>
+      </button>
+      <button class="category-card" data-filter="video">
+        <span class="cat-icon">🎬</span><h3>Video Generation</h3><span class="cat-count">15 tools</span>
+      </button>
+      <button class="category-card" data-filter="code">
+        <span class="cat-icon">👨‍💻</span><h3>Code & Development</h3><span class="cat-count">21 tools</span>
+      </button>
+      <button class="category-card" data-filter="cha
